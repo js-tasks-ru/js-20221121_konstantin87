@@ -2,7 +2,7 @@ export default class SortableTable {
   constructor(headerConfig = [], data = []) {
     this.headerConfig = headerConfig;
     this.data = data;
-    this.defineColumns();
+    this.configureColumns();
     this.render();
   }
 
@@ -10,20 +10,20 @@ export default class SortableTable {
     if (!orderValue) {
       return;
     }
-    this.data = this.sortStrings(this.data, orderValue, fieldValue);
+    this.data = this.sortRows(this.data, orderValue, fieldValue);
     this.subElements.body.innerHTML = this.buildTableTemplate();
   }
 
-  sortStrings(arr, param, value) {
+  sortRows(arr, sortOrder, value) {
     const options = {caseFirst: 'upper', numeric: true};
     const collator = new Intl.Collator(['ru', 'en'], options);
-    const modificator = param === 'asc' ? 1 : -1;
-    const sortCallback = (a, b) => collator.compare(a[value], b[value]) * modificator;
+    const modifier = sortOrder === 'asc' ? 1 : -1;
+    const sortCallback = (a, b) => collator.compare(a[value], b[value]) * modifier;
 
     return [...arr].sort(sortCallback);
   }
 
-  defineColumns() {
+  configureColumns() {
     this.columns = this.headerConfig.map(item => ({id: item.id, template: item.template}));
   }
 
@@ -46,7 +46,7 @@ export default class SortableTable {
                 <span>${title}</span>
               </div>
             `)).join('')
-          }
+    }
        </div>
           `);
   }
@@ -55,13 +55,13 @@ export default class SortableTable {
     return (`
       <a href="/products/${data.id}" class="sortable-table__row">
         ${this.columns.map(item => {
-          if (item.template) {
-            return item.template(data);
-          }
-          return (`
+      if (item.template) {
+        return item.template(data);
+      }
+      return (`
                   <div class="sortable-table__cell">${data[item.id]}</div>
               `);
-        }).join('')}
+    }).join('')}
       </a>
     `);
   }
