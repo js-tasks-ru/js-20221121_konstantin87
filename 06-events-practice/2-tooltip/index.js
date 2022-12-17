@@ -1,11 +1,11 @@
 class Tooltip {
-  static #onlyInstance = null;
+  static #singleton = null;
 
   constructor() {
-    if (!Tooltip.#onlyInstance) {
-      Tooltip.#onlyInstance = this;
+    if (!Tooltip.#singleton) {
+      Tooltip.#singleton = this;
     } else {
-      return Tooltip.#onlyInstance;
+      return Tooltip.#singleton;
     }
   }
 
@@ -17,7 +17,7 @@ class Tooltip {
   trackPointerOver = (event) => {
     if (event.target.closest("[data-tooltip]")) {
       this.element.textContent = event.target.closest("[data-tooltip]").dataset.tooltip;
-      document.body.append(this.element);
+      this.render();
       if (!this.isPointermoveSet) {
         document.body.addEventListener('pointermove', this.trackPointerMove);
         this.isPointermoveSet = true;
@@ -34,22 +34,21 @@ class Tooltip {
   };
 
   initialize = () => {
-    this.render();
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `<div class="tooltip" />`;
+    this.element = wrapper.firstElementChild;
+
     document.body.addEventListener("pointerover", this.trackPointerOver);
     document.body.addEventListener("pointerout", this.trackPointerOut);
   };
 
   render = () => {
-    const wrapper = document.createElement('div');
-
-    wrapper.innerHTML = `<div class="tooltip" />`;
-
-    this.element = wrapper.firstElementChild;
+    document.body.append(this.element);
   };
 
   removeGlobalEventListeners = () => {
     document.body.removeEventListener("pointerover", this.trackPointerOver);
-    document.body.addEventListener("pointerout", this.removeGlobalEventListeners);
+    document.body.removeEventListener("pointerout", this.removeGlobalEventListeners);
   };
 
   destroy = () => {
@@ -57,7 +56,7 @@ class Tooltip {
       this.element.remove();
     }
     this.removeGlobalEventListeners();
-    Tooltip.#onlyInstance = null;
+    Tooltip.#singleton = null;
   };
 }
 
